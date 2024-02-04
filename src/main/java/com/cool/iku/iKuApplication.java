@@ -1,4 +1,4 @@
-package com.cool.usercenter;
+package com.cool.iku;
 
 
 import org.mybatis.spring.annotation.MapperScan;

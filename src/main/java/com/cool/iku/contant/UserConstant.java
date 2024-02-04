@@ -1,4 +1,4 @@
-package com.cool.usercenter.contant;
+package com.cool.iku.contant;
 
 /**
  * 用户常量

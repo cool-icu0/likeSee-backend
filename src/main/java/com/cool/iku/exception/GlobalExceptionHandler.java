@@ -1,8 +1,8 @@
-package com.cool.usercenter.exception;
+package com.cool.iku.exception;
 
-import com.cool.usercenter.common.BaseResponse;
-import com.cool.usercenter.common.ErrorCode;
-import com.cool.usercenter.common.ResultUtils;
+import com.cool.iku.common.BaseResponse;
+import com.cool.iku.common.ErrorCode;
+import com.cool.iku.common.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

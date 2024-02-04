@@ -1,4 +1,4 @@
-package com.cool.usercenter.model.domain;
+package com.cool.iku.model.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;

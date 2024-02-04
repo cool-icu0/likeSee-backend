@@ -1,6 +1,6 @@
-package com.cool.usercenter.mapper;
+package com.cool.iku.mapper;
 
-import com.cool.usercenter.model.domain.User;
+import com.cool.iku.model.domain.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

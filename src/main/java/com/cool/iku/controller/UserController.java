@@ -1,14 +1,14 @@
-package com.cool.usercenter.controller;
+package com.cool.iku.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.cool.usercenter.common.BaseResponse;
-import com.cool.usercenter.common.ErrorCode;
-import com.cool.usercenter.common.ResultUtils;
-import com.cool.usercenter.exception.BusinessException;
-import com.cool.usercenter.model.domain.User;
-import com.cool.usercenter.model.domain.request.UserLoginRequest;
-import com.cool.usercenter.model.domain.request.UserRegisterRequest;
-import com.cool.usercenter.service.UserService;
+import com.cool.iku.common.BaseResponse;
+import com.cool.iku.common.ErrorCode;
+import com.cool.iku.common.ResultUtils;
+import com.cool.iku.exception.BusinessException;
+import com.cool.iku.model.domain.User;
+import com.cool.iku.model.domain.request.UserLoginRequest;
+import com.cool.iku.model.domain.request.UserRegisterRequest;
+import com.cool.iku.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.cool.usercenter.contant.UserConstant.ADMIN_ROLE;
-import static com.cool.usercenter.contant.UserConstant.USER_LOGIN_STATE;
+import static com.cool.iku.contant.UserConstant.ADMIN_ROLE;
+import static com.cool.iku.contant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * 用户接口

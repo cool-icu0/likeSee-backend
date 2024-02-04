@@ -1,4 +1,4 @@
-package com.cool.usercenter.model.domain.request;
+package com.cool.iku.model.domain.request;
 
 import lombok.Data;
 

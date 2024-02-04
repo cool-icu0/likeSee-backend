@@ -1,4 +1,4 @@
-package com.cool.usercenter.common;
+package com.cool.iku.common;
 
 import lombok.Data;
 

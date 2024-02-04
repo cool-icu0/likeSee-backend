@@ -1,6 +1,6 @@
-package com.cool.usercenter.service;
+package com.cool.iku.service;
 
-import com.cool.usercenter.model.domain.User;
+import com.cool.iku.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.servlet.http.HttpServletRequest;
