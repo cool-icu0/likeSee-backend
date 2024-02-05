@@ -11,7 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
  */
 @SpringBootApplication
-@MapperScan("com.cool.usercenter.mapper")
+@MapperScan("com.cool.iku.mapper")
 public class iKuApplication {
 
     public static void main(String[] args) {

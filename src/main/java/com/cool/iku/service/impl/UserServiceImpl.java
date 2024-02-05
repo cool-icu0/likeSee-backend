@@ -10,12 +10,16 @@ import com.cool.iku.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.cool.iku.contant.UserConstant.USER_LOGIN_STATE;
 
@@ -31,8 +35,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Resource
     private UserMapper userMapper;
-
-    // https://www.code-nav.cn/
 
     /**
      * 盐值，混淆密码
@@ -100,8 +102,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         return user.getId();
     }
-
-    // [加入星球](https://www.code-nav.cn/) 从 0 到 1 项目实战，经验拉满！10+ 原创项目手把手教程、7 日项目提升训练营、60+ 编程经验分享直播、1000+ 项目经验笔记
 
     /**
      * 用户登录
@@ -186,6 +186,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return 1;
     }
 
+    /**
+     *   根据标签搜索用户。
+     * @param tagNameList  用户要搜索的标签
+     * @return
+     */
+    @Override
+    public List<User> searchUsersByTags(List<String> tagNameList) {
+        // 判断传入参数是否为空
+        if (CollectionUtils.isEmpty(tagNameList)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        //拼接 and 查询
+        for (String tagName : tagNameList) {
+            queryWrapper=queryWrapper.like("tag",tagName);
+        }
+        List<User> userList = userMapper.selectList(queryWrapper);
+        List<User> safeUserList = new ArrayList<>();
+        for (User user : userList) {
+            safeUserList.add(getSafetyUser(user));
+        }
+        return userList;
+        //return userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
+    }
 }
-
-// [加入我们](https://cool.icu) 从 0 到 1 项目实战，经验拉满！10+ 原创项目手把手教程、7 日项目提升训练营、1000+ 项目经验笔记、60+ 编程经验分享直播

@@ -86,10 +86,6 @@ public class User implements Serializable {
      */
     private String planetCode;
 
-    // https://github.com/licool
-
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }
-
-// [加入编程导航](https://cool.icu) 深耕编程提升【两年半】、国内净值【最高】的编程社群、用心服务【20000+】求学者、帮你自学编程【不走弯路】
