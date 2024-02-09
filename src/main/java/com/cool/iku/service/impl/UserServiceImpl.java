@@ -7,6 +7,8 @@ import com.cool.iku.exception.BusinessException;
 import com.cool.iku.model.domain.User;
 import com.cool.iku.service.UserService;
 import com.cool.iku.mapper.UserMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -15,8 +17,7 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -188,27 +189,58 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     /**
-     *   根据标签搜索用户。
+     *   根据标签搜索用户。(内存过滤版)
      * @param tagNameList  用户要搜索的标签
      * @return
      */
     @Override
-    public List<User> searchUsersByTags(List<String> tagNameList) {
-        // 判断传入参数是否为空
+    public List<User> searchUsersByTags(List<String> tagNameList){
+        if (CollectionUtils.isEmpty(tagNameList)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //1.先查询所有用户
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        List<User> userList = userMapper.selectList(queryWrapper);
+        Gson gson = new Gson();
+        //2.判断内存中是否包含要求的标签 parallelStream()
+        return userList.stream().filter(user -> {
+            String tagstr = user.getTags();
+//            if (StringUtils.isBlank(tagstr)){
+//                return false;
+//            }
+            Set<String> tempTagNameSet =  gson.fromJson(tagstr,new TypeToken<Set<String>>(){}.getType());
+            //java8  Optional 来判断空
+            tempTagNameSet = Optional.ofNullable(tempTagNameSet).orElse(new HashSet<>());
+
+            for (String tagName : tagNameList){
+                if (!tempTagNameSet.contains(tagName)){
+                    return false;
+                }
+            }
+            return true;
+        }).map(this::getSafetyUser).collect(Collectors.toList());
+    }
+
+
+    /**
+     *   根据标签搜索用户。(sql查询版)
+     *   @Deprecated 过时
+     * @param tagNameList  用户要搜索的标签
+     * @return
+     */
+    @Deprecated
+    private List<User> searchUsersByTagBySQL(List<String> tagNameList){
         if (CollectionUtils.isEmpty(tagNameList)){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        //拼接 and 查询
-        for (String tagName : tagNameList) {
-            queryWrapper=queryWrapper.like("tag",tagName);
+        //拼接tag
+        // like '%Java%' and like '%Python%'
+        for (String tagList : tagNameList) {
+            queryWrapper = queryWrapper.like("tags", tagList);
         }
         List<User> userList = userMapper.selectList(queryWrapper);
-        List<User> safeUserList = new ArrayList<>();
-        for (User user : userList) {
-            safeUserList.add(getSafetyUser(user));
-        }
-        return userList;
-        //return userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
+        return  userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
     }
+
 }

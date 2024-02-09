@@ -4,9 +4,9 @@ spring:
   # DataSource Config
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: 'jdbc:mysql://sh-cynosdbmysql-grp-98pxrcoq.sql.tencentcdb.com:29164/user_center?useSSL=false'
-    username: self
-    password: licool66!
+    url: jdbc:mysql://localhost:3306/iku
+    username: root
+    password: root
   # session 失效时间
   session:
     timeout: 86400
