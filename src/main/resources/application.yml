@@ -4,13 +4,16 @@ spring:
     name: iku-backend
   # DataSource Config
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/iku
     username: root
     password: root
   # session 失效时间
   session:
     timeout: 86400
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 server:
   port: 8080
   servlet:
