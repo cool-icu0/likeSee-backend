@@ -22,17 +22,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.cool.iku.contant.UserConstant.ADMIN_ROLE;
 import static com.cool.iku.contant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * 用户服务实现类
- *
-
  */
 @Service
 @Slf4j
-public class UserServiceImpl extends ServiceImpl<UserMapper, User>
-        implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     @Resource
     private UserMapper userMapper;
@@ -42,15 +40,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     private static final String SALT = "cool";
 
-    /**
-     * 用户注册
-     *
-     * @param userAccount   用户账户
-     * @param userPassword  用户密码
-     * @param checkPassword 校验密码
-     * @param planetCode    星球编号
-     * @return 新用户 id
-     */
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword, String planetCode) {
         // 1. 校验
@@ -104,14 +93,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return user.getId();
     }
 
-    /**
-     * 用户登录
-     *
-     * @param userAccount  用户账户
-     * @param userPassword 用户密码
-     * @param request
-     * @return 脱敏后的用户信息
-     */
     @Override
     public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
         // 1. 校验
@@ -132,7 +113,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         // 2. 加密
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
-        System.out.println("用户密码是"+encryptPassword);
         // 查询用户是否存在
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount", userAccount);
@@ -147,6 +127,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         User safetyUser = getSafetyUser(user);
         // 4. 记录用户的登录态
         request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);
+        System.out.println("user login session："+request.getSession().getAttribute(USER_LOGIN_STATE));
         return safetyUser;
     }
 
@@ -190,8 +171,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     /**
-     *   根据标签搜索用户。(内存过滤版)
-     * @param tagNameList  用户要搜索的标签
+     * 根据标签搜索用户。(内存过滤版)
+     *
+     * @param tagNameList 用户要搜索的标签
      * @return
      */
     @Override
@@ -199,16 +181,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (CollectionUtils.isEmpty(tagNameList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 1. 先查询所有用户
+
+        //1.先查询所有用户
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         List<User> userList = userMapper.selectList(queryWrapper);
         Gson gson = new Gson();
-        // 2. 在内存中判断是否包含要求的标签
+        //2.判断内存中是否包含要求的标签 parallelStream()
         return userList.stream().filter(user -> {
-            String tagsStr = user.getTags();
-            Set<String> tempTagNameSet = gson.fromJson(tagsStr, new TypeToken<Set<String>>() {
+            String tagstr = user.getTags();
+            if (StringUtils.isBlank(tagstr)) {
+                return false;
+            }
+            Set<String> tempTagNameSet;
+            tempTagNameSet = gson.fromJson(tagstr, new TypeToken<Set<String>>() {
             }.getType());
+            //java8  Optional
             tempTagNameSet = Optional.ofNullable(tempTagNameSet).orElse(new HashSet<>());
+
             for (String tagName : tagNameList) {
                 if (!tempTagNameSet.contains(tagName)) {
                     return false;
@@ -218,17 +207,82 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }).map(this::getSafetyUser).collect(Collectors.toList());
     }
 
+    /**
+     * 用户信息修改
+     *
+     * @param user
+     * @return
+     */
+    @Override
+    public int updateUser(User user, User loginUser) {
+        long userId = user.getId();
+        if (userId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //如果是管理员，允许更新任意用户
+        //如果不是管理员，只允许更新自己的信息
+        if (!isAdmin(loginUser) && userId != loginUser.getId()) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        User userold = userMapper.selectById(userId);
+        if (userold == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR);
+        }
+        return userMapper.updateById(user);
+    }
+
+    /**
+     * 是否为管理员
+     *
+     * @param request
+     * @return
+     */
+    public boolean isAdmin(HttpServletRequest request) {
+        // 仅管理员可查询
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User user = (User) userObj;
+        return user != null && user.getUserRole() == ADMIN_ROLE;
+    }
+
+    /**
+     * 是否为管理员
+     *
+     * @param loginUser
+     * @return
+     */
+    public boolean isAdmin(User loginUser) {
+        return loginUser != null && loginUser.getUserRole() == ADMIN_ROLE;
+    }
+
+    /**
+     * 获取当前用户信息
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public User getLogininUser(HttpServletRequest request) {
+        if (request == null) {
+            return null;
+        }
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if (userObj == null) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        return (User) userObj;
+    }
 
 
     /**
-     *   根据标签搜索用户。(sql查询版)
-     *   @Deprecated 过时
-     * @param tagNameList  用户要搜索的标签
+     * 根据标签搜索用户。(sql查询版)
+     *
+     * @param tagNameList 用户要搜索的标签
      * @return
+     * @Deprecated 过时
      */
     @Deprecated
-    private List<User> searchUsersByTagBySQL(List<String> tagNameList){
-        if (CollectionUtils.isEmpty(tagNameList)){
+    private List<User> searchUsersByTagBySQL(List<String> tagNameList) {
+        if (CollectionUtils.isEmpty(tagNameList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
@@ -238,7 +292,58 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             queryWrapper = queryWrapper.like("tags", tagList);
         }
         List<User> userList = userMapper.selectList(queryWrapper);
-        return  userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
+        return userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
     }
 
+
+    /**
+     * sql运行查询
+     *
+     * @param tagNameList
+     * @return
+     */
+    public List<User> sqlSearch(List<String> tagNameList) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        long starTime = System.currentTimeMillis();
+        //拼接tag
+        // like '%Java%' and like '%Python%'
+        for (String tagList : tagNameList) {
+            queryWrapper = queryWrapper.like("tags", tagList);
+        }
+        List<User> userList = userMapper.selectList(queryWrapper);
+        log.info("sql query time = " + (System.currentTimeMillis() - starTime));
+        return userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
+    }
+
+    /**
+     * 查询，内存运行筛选
+     *
+     * @param tagNameList
+     * @return
+     */
+    public List<User> memorySearch(List<String> tagNameList) {
+
+        //1.先查询所有用户
+        QueryWrapper queryWrapper = new QueryWrapper<>();
+        long starTime = System.currentTimeMillis();
+        List<User> userList = userMapper.selectList(queryWrapper);
+        Gson gson = new Gson();
+        //2.判断内存中是否包含要求的标签
+        userList.stream().filter(user -> {
+            String tagstr = user.getTags();
+            if (StringUtils.isBlank(tagstr)) {
+                return false;
+            }
+            Set<String> tempTagNameSet = gson.fromJson(tagstr, new TypeToken<Set<String>>() {
+            }.getType());
+            for (String tagName : tagNameList) {
+                if (!tempTagNameSet.contains(tagName)) {
+                    return false;
+                }
+            }
+            return true;
+        }).map(this::getSafetyUser).collect(Collectors.toList());
+        log.info("memory query time = {}", System.currentTimeMillis() - starTime);
+        return userList;
+    }
 }
