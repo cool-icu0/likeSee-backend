@@ -8,18 +8,23 @@ import com.cool.iku.common.ErrorCode;
 import com.cool.iku.common.ResultUtils;
 import com.cool.iku.exception.BusinessException;
 import com.cool.iku.model.domain.User;
-import com.cool.iku.model.domain.request.UserLoginRequest;
-import com.cool.iku.model.domain.request.UserRegisterRequest;
+import com.cool.iku.model.request.UserLoginRequest;
+import com.cool.iku.model.request.UserRegisterRequest;
 import com.cool.iku.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static com.cool.iku.contant.RedisConstant.USER_RECOMMEND_KEY;
 import static com.cool.iku.contant.UserConstant.USER_LOGIN_STATE;
 
 /**
@@ -27,11 +32,14 @@ import static com.cool.iku.contant.UserConstant.USER_LOGIN_STATE;
  */
 @RestController
 @RequestMapping("/user")
+@Slf4j
 @CrossOrigin(origins = "http://localhost:3000",allowCredentials = "true")
 public class UserController {
 
     @Resource
     private UserService userService;
+    @Resource
+    private RedisTemplate redisTemplate;
 
     /**
      * 用户注册
@@ -149,19 +157,26 @@ public class UserController {
      * @return
      */
     @GetMapping("/recommend")
-    //分页查询
-    public BaseResponse<Page<User>> recommendUsers(long pageSize,long pageNum,HttpServletRequest request) {
+    public BaseResponse<Page<User>> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
+        User logininUser = userService.getLogininUser(request);
+        String redisKey = String.format(USER_RECOMMEND_KEY,logininUser.getId());
+        ValueOperations valueOperations = redisTemplate.opsForValue();
+        //如果有缓存，直接读取
+        Page<User> userPage = (Page<User>) valueOperations.get(redisKey);
+        if (userPage != null){
+            return ResultUtils.success(userPage);
+        }
+        //无缓存，查数据库
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        Page<User> userList = userService.page(new Page<>(pageNum, pageSize), queryWrapper);
-        return ResultUtils.success(userList);
+        userPage = userService.page(new Page<>(pageNum,pageSize),queryWrapper);
+        //写缓存,10s过期
+        try {
+            valueOperations.set(redisKey,userPage,30000, TimeUnit.MILLISECONDS);
+        } catch (Exception e){
+            log.error("redis set key error",e);
+        }
+        return ResultUtils.success(userPage);
     }
-    //全量查询
-//    public BaseResponse<List<User>> recommendUsers(HttpServletRequest request) {
-//        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-//        List<User> userList = userService.list(queryWrapper);
-//        List<User> list = userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
-//        return ResultUtils.success(list);
-//    }
 
     /**
      * 用户信息更新
