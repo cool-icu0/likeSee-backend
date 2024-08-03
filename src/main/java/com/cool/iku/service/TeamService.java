@@ -2,6 +2,7 @@ package com.cool.iku.service;
 
 import com.cool.iku.model.domain.Team;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.cool.iku.model.domain.User;
 
 /**
 * @author Cool
@@ -10,4 +11,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface TeamService extends IService<Team> {
 
+    /**
+     *   添加队伍
+     * @param team
+     * @param logininUser
+     * @return
+     */
+    long addTeam(Team team, User logininUser);
 }
