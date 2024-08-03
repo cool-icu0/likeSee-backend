@@ -40,6 +40,13 @@ public class TeamController {
     @Resource
     private TeamService teamService;
 
+    /**
+     * 创建队伍
+     *
+     * @param teamAddRequest
+     * @param request
+     * @return
+     */
     @PostMapping("/add")
     public BaseResponse<Long> addTeam(@RequestBody TeamAddRequest teamAddRequest, HttpServletRequest request) {
         if (teamAddRequest == null) {
