@@ -9,10 +9,7 @@ import com.cool.iku.model.domain.Team;
 import com.cool.iku.model.domain.User;
 import com.cool.iku.model.domain.UserTeam;
 import com.cool.iku.model.dto.TeamQuery;
-import com.cool.iku.model.request.TeamAddRequest;
-import com.cool.iku.model.request.TeamJoinRequest;
-import com.cool.iku.model.request.TeamQuitRequest;
-import com.cool.iku.model.request.TeamUpdateRequest;
+import com.cool.iku.model.request.*;
 import com.cool.iku.model.vo.TeamUserVO;
 import com.cool.iku.service.TeamService;
 import com.cool.iku.service.UserService;
@@ -36,7 +33,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/team")
-@CrossOrigin(origins = {"http://localhost:3000"},allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
 @Slf4j
 public class TeamController {
 
@@ -69,25 +66,30 @@ public class TeamController {
         long teamId = teamService.addTeam(team, logininUser);
         return ResultUtils.success(teamId);
     }
+
     /**
      * 解散队伍
-     * @param id
+     *
+     * @param deleteRequest
      * @return
      */
     @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteTeam(@RequestBody long id,HttpServletRequest request) {
-        if (id <= 0) {
+    public BaseResponse<Boolean> deleteTeam(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        long id = deleteRequest.getId();
         User logininUser = userService.getLogininUser(request);
-        boolean result = teamService.deleteTeam(id,logininUser);
+        boolean result = teamService.deleteTeam(id, logininUser);
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除失败");
         }
         return ResultUtils.success(true);
     }
+
     /**
      * 获取我创建的队伍
+     *
      * @param teamQuery
      * @param request
      * @return
@@ -102,6 +104,7 @@ public class TeamController {
         List<TeamUserVO> teamList = teamService.listTeams(teamQuery, true);
         return ResultUtils.success(teamList);
     }
+
     /**
      * 获取我加入的队伍
      *
@@ -127,8 +130,10 @@ public class TeamController {
         List<TeamUserVO> teamList = teamService.listTeams(teamQuery, true);
         return ResultUtils.success(teamList);
     }
+
     /**
      * 更新队伍
+     *
      * @param team
      * @return
      */
@@ -144,20 +149,23 @@ public class TeamController {
         }
         return ResultUtils.success(true);
     }
+
     /**
      * 加入队伍
+     *
      * @param teamJoinRequest
      * @return
      */
     @PostMapping("/join")
     public BaseResponse<Boolean> joinTeam(@RequestBody TeamJoinRequest teamJoinRequest, HttpServletRequest request) {
-        if (teamJoinRequest == null){
+        if (teamJoinRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User logininUser = userService.getLogininUser(request);
         boolean result = teamService.joinTeam(teamJoinRequest, logininUser);
         return ResultUtils.success(result);
     }
+
     @GetMapping("/get")
     public BaseResponse<Team> getTeamById(long id) {
         if (id <= 0) {
@@ -172,26 +180,29 @@ public class TeamController {
 
     /**
      * 搜索队伍
+     *
      * @param teamQuery
      * @return
      */
     @GetMapping("/list")
-    public BaseResponse<List<TeamUserVO>> listTeams(TeamQuery teamQuery,HttpServletRequest request) {
+    public BaseResponse<List<TeamUserVO>> listTeams(TeamQuery teamQuery, HttpServletRequest request) {
         if (teamQuery == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         boolean isAdmin = userService.isAdmin(request);
-        List<TeamUserVO> teamList = teamService.listTeams(teamQuery,isAdmin);
+        List<TeamUserVO> teamList = teamService.listTeams(teamQuery, isAdmin);
         return ResultUtils.success(teamList);
     }
+
     /**
      * 退出队伍
+     *
      * @param teamQuitRequest
      * @return
      */
     @PostMapping("/quit")
-    public BaseResponse<Boolean> quitTeam(@RequestBody TeamQuitRequest teamQuitRequest, HttpServletRequest request){
-        if (teamQuitRequest == null){
+    public BaseResponse<Boolean> quitTeam(@RequestBody TeamQuitRequest teamQuitRequest, HttpServletRequest request) {
+        if (teamQuitRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLogininUser(request);
