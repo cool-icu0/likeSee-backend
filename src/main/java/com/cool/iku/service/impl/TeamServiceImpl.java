@@ -171,7 +171,11 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             if (statusEnum == null) {
                 statusEnum = TeamStatusEnum.PUBLIC;
             }
-            if (!isAdmin && statusEnum.equals(TeamStatusEnum.PRIVATE)) {
+            // todo
+            // 查询时，不是管理员，队伍状态为私有，即没有权限。
+            // if (!isAdmin && statusEnum.equals(TeamStatusEnum.PRIVATE)) {
+            //修改成显示三个状态的形式
+            if (isAdmin) {
                 throw new BusinessException(ErrorCode.NO_AUTH);
             }
             queryWrapper.eq("status", statusEnum.getValue());
