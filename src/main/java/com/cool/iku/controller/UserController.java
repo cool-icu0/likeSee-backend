@@ -191,8 +191,8 @@ public class UserController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         //鉴权
-        User loginUser = userService.getLogininUser(request);
-        int result = userService.updateUser(user, loginUser);
+        User logininUser = userService.getLogininUser(request);
+        int result = userService.updateUser(user, logininUser);
         return ResultUtils.success(result);
     }
 
@@ -215,5 +215,19 @@ public class UserController {
         return ResultUtils.success(b);
     }
 
-
+    /**
+     * 获取最匹配的用户
+     *
+     * @param num
+     * @param request
+     * @return
+     */
+    @GetMapping("/match")
+    public BaseResponse<List<User>> matchUsers(long num, HttpServletRequest request) {
+        if (num <= 0 || num > 20) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User user = userService.getLogininUser(request);
+        return ResultUtils.success(userService.matchUsers(num, user));
+    }
 }

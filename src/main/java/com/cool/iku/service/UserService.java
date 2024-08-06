@@ -61,7 +61,7 @@ public interface UserService extends IService<User> {
      * @param user
      * @return
      */
-    int updateUser(User user,User loginUser);
+    int updateUser(User user,User logininUser);
 
     /**
      *  获取当前用户信息
@@ -81,9 +81,16 @@ public interface UserService extends IService<User> {
     /**
      * 是否为管理员
      *
-     * @param loginUser
+     * @param logininUser
      * @return
      */
-    boolean isAdmin(User loginUser);
+    boolean isAdmin(User logininUser);
+    /**
+     * 获取最匹配的用户
+     * @param num
+     * @param user
+     * @return
+     **/
+    List<User> matchUsers(long num, User user);
 }
 
