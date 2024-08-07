@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.cool</groupId>
-    <artifactId>iku-backend</artifactId>
+    <artifactId>likeSee-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>iku-backend</name>
-    <description>iku-backend</description>
+    <name>likeSee-backend</name>
+    <description>likeSee-backend</description>
     <properties>
         <java.version>1.8</java.version>
     </properties>

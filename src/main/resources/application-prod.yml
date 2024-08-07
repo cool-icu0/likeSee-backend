@@ -4,7 +4,7 @@ spring:
   # DataSource Config
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/iku
+    url: jdbc:mysql://localhost:3306/likeSee
     username: root
     password: root
   # session 失效时间

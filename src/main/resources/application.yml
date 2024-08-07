@@ -1,14 +1,14 @@
 # 公共配置文件
 spring:
   application:
-    name: iku-backend
+    name: likeSee-backend
   # DataSource Config
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/iku
+    url: jdbc:mysql://localhost:3306/likeSee
     username: root
     password: root
   # session 失效时间
