@@ -1,7 +1,7 @@
 # 热聊-伙伴匹配项目
 ## 介绍：帮助大家匹配志同道合的伙伴，（移动端 H5 网页版本 ）
 ### 项目地址
-```
+
 移动端代码Github：https://github.com/cool-icu0/likeSee-backend
 
 移动端代码Gitee：https://gitee.com/partner-matching-system/likeSee-frontend
@@ -9,7 +9,6 @@
 后端代码Github：https://github.com/cool-icu0/likeSee-frontend
 
 后端代码Gitee：https://gitee.com/partner-matching-system/likeSee-backend
-```
 ### 技术选型
 #### 前端
 1. Vue3
