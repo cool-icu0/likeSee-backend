@@ -3,13 +3,13 @@
 ### 项目地址
 
 - 移动端代码Github：https://github.com/cool-icu0/likeSee-frontend
-</br>
+
 - 移动端代码Gitee：https://gitee.com/partner-matching-system/likeSee-frontend
-</br>
+
 - 后端代码Github：https://github.com/cool-icu0/likeSee-backend  
-</br>
+
 - 后端代码Gitee：https://gitee.com/partner-matching-system/likeSee-backend
-</br>
+
 ### 技术选型
 #### 前端
 1. Vue3
